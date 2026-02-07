@@ -208,22 +208,39 @@ export async function POST(request: NextRequest) {
     const analysis = await analyzeWithAI(scrapedContent);
 
     // 6. Save & Return
-    const savedScan = await saveScan({
+    const screenshotUrl = `https://api.microlink.io?url=${encodeURIComponent(normalizedUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
+    const scanToSave = {
       url_hash: urlHash,
       url: normalizedUrl,
-      ...analysis,
-    });
-
-    const screenshotUrl = `https://api.microlink.io?url=${encodeURIComponent(normalizedUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
+      summary: analysis.summary,
+      risk_score: analysis.risk_score,
+      reason: analysis.reason,
+      category: analysis.category,
+      tags: analysis.tags,
+      screenshot_url: screenshotUrl,
+      from_cache: false,
+    };
+    const savedScan = await saveScan(scanToSave);
+    if (!savedScan) {
+      console.error('Supabase insert failed: scanToSave =', scanToSave);
+      return NextResponse.json(
+        { success: false, error: 'Failed to save scan to database.' },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({
       success: true,
       data: {
-        id: savedScan?.id || 'temp',
-        url: normalizedUrl,
-        ...analysis,
-        screenshot_url: screenshotUrl,
-        created_at: new Date().toISOString(),
+        id: savedScan.id,
+        url: savedScan.url,
+        summary: savedScan.summary,
+        risk_score: savedScan.risk_score,
+        reason: savedScan.reason,
+        category: savedScan.category,
+        tags: savedScan.tags,
+        screenshot_url: savedScan.screenshot_url,
+        created_at: savedScan.created_at,
         from_cache: false,
       },
     });

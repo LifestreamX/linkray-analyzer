@@ -116,19 +116,19 @@ export default function Home() {
         <div className='mb-12 max-w-5xl mx-auto w-full'>
           <form onSubmit={handleAnalyze} className='max-w-5xl w-full mx-auto'>
             <div className='bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-gray-700'>
-              <div className='flex gap-4'>
+              <div className='flex flex-col md:flex-row gap-4'>
                 <input
                   type='text'
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder='Enter a URL to analyze (e.g., example.com)'
-                  className='flex-1 bg-gray-900/50 border border-gray-600 rounded-xl px-8 py-5 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
+                  className='w-full md:flex-1 bg-gray-900/50 border border-gray-600 rounded-xl px-8 py-5 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all mb-4 md:mb-0'
                   disabled={loading}
                 />
                 <button
                   type='submit'
                   disabled={loading}
-                  className='bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold px-10 py-5 rounded-xl transition-all transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg'
+                  className='w-full md:w-auto bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold px-10 py-5 rounded-xl transition-all transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg'
                 >
                   {loading ? (
                     <span className='flex items-center gap-2'>

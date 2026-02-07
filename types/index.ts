@@ -9,6 +9,9 @@ export interface Scan {
   category: string;
   tags: string[];
   created_at: string;
+  reason: string;
+  screenshot_url: string;
+  from_cache: boolean;
 }
 
 export interface AnalysisRequest {
