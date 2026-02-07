@@ -34,7 +34,12 @@ export default function Home() {
   }, []);
 
   const handleSignIn = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        queryParams: { prompt: 'select_account' },
+      },
+    });
   };
 
   const handleSignOut = async () => {
