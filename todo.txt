@@ -1,7 +1,6 @@
 
-TODO: Log in to use / store 
 
-TODO: Recent Scan bug not showing most recent
+TODO: Recent Scan bug not showing most recent when over 10 scans saved
 
 TODO: How does AI rank safety score
 

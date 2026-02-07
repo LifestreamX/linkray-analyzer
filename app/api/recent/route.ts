@@ -37,7 +37,7 @@ export async function GET(request: Request) {
       .from('scans')
       .select('*')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false }) // newest first
       .limit(10);
     if (error) {
       console.error('Error fetching recent scans:', error);

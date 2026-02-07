@@ -56,7 +56,7 @@ export default function Home() {
       });
       const data = await response.json();
       if (data.success) {
-        setRecentScans([...data.data].reverse());
+        setRecentScans([...data.data]);
       }
     } catch (error) {
       console.error('Failed to fetch recent scans:', error);
