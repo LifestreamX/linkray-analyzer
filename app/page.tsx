@@ -116,13 +116,14 @@ export default function Home() {
 
   const handleQuickScan = (scanUrl: string) => {
     setUrl(scanUrl);
-    setResult(null);
     setError(null);
-    // Auto-trigger analysis after setting the URL
-    setTimeout(() => {
-      const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
-      handleAnalyze(fakeEvent);
-    }, 0);
+    // Find the scan in recentScans and display it directly
+    const foundScan = recentScans.find((scan) => scan.url === scanUrl);
+    if (foundScan) {
+      setResult(foundScan);
+      return;
+    }
+    setResult(null);
   };
 
   return (
