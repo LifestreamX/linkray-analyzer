@@ -1,11 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
-import { getCachedScan, saveScan } from '@/lib/supabase';
+import { getCachedScan, saveScan, supabase } from '@/lib/supabase';
 import { hashUrl, validateUrl } from '@/lib/utils';
 import type {
   AnalysisRequest,
-  AnalysisResponse,
   GeminiAnalysisResult,
   ScrapedContent,
 } from '@/types';
@@ -148,8 +147,13 @@ async function analyzeWithAI(
 /**
  * Main POST handler for /api/analyze
  */
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
+    // Get user session from Supabase Auth (using cookies)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const body: AnalysisRequest = await request.json();
     const { url } = body;
 
@@ -165,18 +169,20 @@ export async function POST(request: NextRequest) {
     const normalizedUrl = validation.normalized!;
     const urlHash = hashUrl(normalizedUrl);
 
-    // 2. Check Cache
-    const cachedScan = await getCachedScan(urlHash);
-    if (cachedScan) {
-      const screenshotUrl = `https://api.microlink.io?url=${encodeURIComponent(normalizedUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
-      return NextResponse.json({
-        success: true,
-        data: {
-          ...cachedScan,
-          screenshot_url: screenshotUrl,
-          from_cache: true,
-        },
-      });
+    // 2. If user is signed in, check cache for their scan
+    if (user) {
+      const cachedScan = await getCachedScan(urlHash);
+      if (cachedScan && cachedScan.user_id === user.id) {
+        const screenshotUrl = `https://api.microlink.io?url=${encodeURIComponent(normalizedUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
+        return NextResponse.json({
+          success: true,
+          data: {
+            ...cachedScan,
+            screenshot_url: screenshotUrl,
+            from_cache: true,
+          },
+        });
+      }
     }
 
     // 3. Fetch HTML
@@ -225,8 +231,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 6. Save & Return (only if analysis is valid)
-    // If the analysis is a fallback/failure, do not save to DB or return a fake result
+    // 6. Save & Return (only if analysis is valid and user is signed in)
     if (
       analysis.summary === 'Unable to analyze this website at the moment.' &&
       analysis.reason === 'Analysis failed or not available.' &&
@@ -243,41 +248,64 @@ export async function POST(request: NextRequest) {
     }
 
     const screenshotUrl = `https://api.microlink.io?url=${encodeURIComponent(normalizedUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
-    const scanToSave = {
-      url_hash: urlHash,
-      url: normalizedUrl,
-      summary: analysis.summary,
-      risk_score: analysis.risk_score,
-      reason: analysis.reason,
-      category: analysis.category,
-      tags: analysis.tags,
-      screenshot_url: screenshotUrl,
-      from_cache: false,
-    };
-    const savedScan = await saveScan(scanToSave);
-    if (!savedScan) {
-      console.error('Supabase insert failed: scanToSave =', scanToSave);
-      return NextResponse.json(
-        { success: false, error: 'Failed to save scan to database.' },
-        { status: 500 },
-      );
-    }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: savedScan.id,
-        url: savedScan.url,
-        summary: savedScan.summary,
-        risk_score: savedScan.risk_score,
-        reason: savedScan.reason,
-        category: savedScan.category,
-        tags: savedScan.tags,
-        screenshot_url: savedScan.screenshot_url,
-        created_at: savedScan.created_at,
+    if (user) {
+      // Save scan for signed-in user
+      const scanToSave = {
+        user_id: user.id,
+        url_hash: urlHash,
+        url: normalizedUrl,
+        summary: analysis.summary,
+        risk_score: analysis.risk_score,
+        reason: analysis.reason,
+        category: analysis.category,
+        tags: analysis.tags,
+        screenshot_url: screenshotUrl,
         from_cache: false,
-      },
-    });
+      };
+      const savedScan = await saveScan(scanToSave);
+      if (!savedScan) {
+        console.error('Supabase insert failed: scanToSave =', scanToSave);
+        return NextResponse.json(
+          { success: false, error: 'Failed to save scan to database.' },
+          { status: 500 },
+        );
+      }
+      return NextResponse.json({
+        success: true,
+        data: {
+          id: savedScan.id,
+          user_id: savedScan.user_id,
+          url: savedScan.url,
+          summary: savedScan.summary,
+          risk_score: savedScan.risk_score,
+          reason: savedScan.reason,
+          category: savedScan.category,
+          tags: savedScan.tags,
+          screenshot_url: savedScan.screenshot_url,
+          created_at: savedScan.created_at,
+          from_cache: false,
+        },
+      });
+    } else {
+      // Anonymous: just return the analysis, do not save
+      return NextResponse.json({
+        success: true,
+        data: {
+          id: '',
+          user_id: '',
+          url: normalizedUrl,
+          summary: analysis.summary,
+          risk_score: analysis.risk_score,
+          reason: analysis.reason,
+          category: analysis.category,
+          tags: analysis.tags,
+          screenshot_url: screenshotUrl,
+          created_at: '',
+          from_cache: false,
+        },
+      });
+    }
   } catch (error: any) {
     console.error('Server Error:', error);
     return NextResponse.json(

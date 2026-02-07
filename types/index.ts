@@ -2,6 +2,7 @@
 
 export interface Scan {
   id: string;
+  user_id: string;
   url_hash: string;
   url: string;
   summary: string;
@@ -26,6 +27,7 @@ export interface AnalysisResponse {
 
 export interface ScanResult {
   id: string;
+  user_id: string;
   url: string;
   summary: string;
   risk_score: number;
