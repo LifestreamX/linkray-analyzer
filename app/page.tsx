@@ -49,7 +49,17 @@ export default function Home() {
         body: JSON.stringify({ url }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        // If parsing fails, show a user-friendly error
+        setError(
+          'Website could not be analyzed. It may block bots or return invalid data.',
+        );
+        setLoading(false);
+        return;
+      }
 
       if (data.success) {
         setResult(data.data);
@@ -72,10 +82,10 @@ export default function Home() {
   };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white'>
-      <div className='container mx-auto px-4 py-8 max-w-6xl'>
+    <div className='min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white flex items-center justify-center'>
+      <div className='w-full max-w-7xl mx-auto px-4 py-6 flex flex-col items-center justify-center mb-36'>
         {/* Header */}
-        <header className='text-center mb-12 pt-8'>
+        <header className='text-center mb-12 pt-8 max-w-5xl mx-auto w-full'>
           <div className='inline-flex items-center gap-3 mb-4'>
             <div className='w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center'>
               <svg
@@ -103,22 +113,22 @@ export default function Home() {
         </header>
 
         {/* Search Form */}
-        <div className='mb-12'>
-          <form onSubmit={handleAnalyze} className='max-w-3xl mx-auto'>
-            <div className='bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-gray-700'>
-              <div className='flex gap-3'>
+        <div className='mb-12 max-w-5xl mx-auto w-full'>
+          <form onSubmit={handleAnalyze} className='max-w-5xl w-full mx-auto'>
+            <div className='bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-gray-700'>
+              <div className='flex gap-4'>
                 <input
                   type='text'
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder='Enter a URL to analyze (e.g., example.com)'
-                  className='flex-1 bg-gray-900/50 border border-gray-600 rounded-xl px-6 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
+                  className='flex-1 bg-gray-900/50 border border-gray-600 rounded-xl px-8 py-5 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
                   disabled={loading}
                 />
                 <button
                   type='submit'
                   disabled={loading}
-                  className='bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold px-8 py-4 rounded-xl transition-all transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg'
+                  className='bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold px-10 py-5 rounded-xl transition-all transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg'
                 >
                   {loading ? (
                     <span className='flex items-center gap-2'>
@@ -154,7 +164,7 @@ export default function Home() {
 
         {/* Loading State */}
         {loading && (
-          <div className='max-w-3xl mx-auto mb-8'>
+          <div className='max-w-5xl mx-auto mb-8 w-full'>
             <div className='bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700 animate-pulse'>
               <div className='flex items-center justify-center gap-3 mb-4'>
                 <div className='w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin'></div>
@@ -170,7 +180,7 @@ export default function Home() {
 
         {/* Error State */}
         {error && (
-          <div className='max-w-3xl mx-auto mb-8'>
+          <div className='max-w-5xl mx-auto mb-8 w-full'>
             <div className='bg-red-900/20 border border-red-500/50 rounded-2xl p-6'>
               <div className='flex items-start gap-3'>
                 <svg
@@ -199,7 +209,7 @@ export default function Home() {
 
         {/* Result Card */}
         {result && (
-          <div className='max-w-3xl mx-auto mb-12'>
+          <div className='max-w-5xl mx-auto mb-12 w-full'>
             <div className='bg-gray-800/50 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl border border-gray-700'>
               {/* Screenshot */}
               <div className='bg-gray-900/50 p-4'>
@@ -315,7 +325,7 @@ export default function Home() {
 
         {/* Recent Scans */}
         {recentScans.length > 0 && (
-          <div className='max-w-3xl mx-auto'>
+          <div className='max-w-5xl mx-auto w-full'>
             <h2 className='text-2xl font-bold mb-4 text-gray-200'>
               Recent Scans
             </h2>
@@ -366,10 +376,6 @@ export default function Home() {
         )}
 
         {/* Footer */}
-        <footer className='mt-16 text-center text-gray-500 text-sm'>
-          <p>Powered by Google Gemini AI • Built with Next.js & Supabase</p>
-          <p className='mt-2'>100% Free Tier Stack 🚀</p>
-        </footer>
       </div>
     </div>
   );
