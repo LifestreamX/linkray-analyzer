@@ -159,32 +159,33 @@ export async function POST(request: Request) {
           from_cache: false,
         };
 
+        // Upsert: update if exists, insert if not
         const { data, error } = await supabaseAuth
           .from('scans')
-          .insert({ ...scanToSave, created_at: undefined })
+          .upsert(scanToSave, { onConflict: 'user_id,url_hash' })
           .select()
           .single();
 
         if (error) {
           console.error('Error saving deep scan:', error);
+        } else {
+          return NextResponse.json({
+            success: true,
+            data: {
+              id: data?.id || 'temp',
+              user_id: user.id,
+              url: normalizedUrl,
+              ...analysis,
+              screenshot_url: screenshotUrl,
+              created_at: data?.created_at || new Date().toISOString(),
+              from_cache: false,
+            },
+          });
         }
-
-        return NextResponse.json({
-          success: true,
-          data: {
-            id: data?.id || 'temp',
-            user_id: user.id,
-            url: normalizedUrl,
-            ...analysis,
-            screenshot_url: screenshotUrl,
-            created_at: data?.created_at || new Date().toISOString(),
-            from_cache: false,
-          },
-        });
       }
     }
 
-    // Anonymous user - no save
+    // Anonymous user or save failed - return without DB save
     return NextResponse.json({
       success: true,
       data: {
