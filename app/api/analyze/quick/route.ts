@@ -186,6 +186,7 @@ export async function POST(request: Request) {
           tags: analysis.tags,
           screenshot_url: screenshotUrl,
           from_cache: false,
+          created_at: new Date().toISOString(),
         };
 
         // Upsert: update if exists, insert if not
