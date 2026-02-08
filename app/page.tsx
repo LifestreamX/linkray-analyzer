@@ -465,7 +465,7 @@ export default function Home() {
                         <span className='text-xs text-gray-500'>
                           {scan.category}
                         </span>
-                        <span className='text-xs text-gray-600'>
+                        <span className='flex-1 text-right text-xs text-gray-600 block sm:text-left'>
                           {formatRelativeTime(scan.created_at)}
                         </span>
                       </div>
