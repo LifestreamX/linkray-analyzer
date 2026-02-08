@@ -1,50 +1,46 @@
--- LinkRay Database Schema for Supabase
+-- LinkRay Supabase Schema (2026)
 -- Run this in your Supabase SQL Editor
 
--- Create the scans table
-CREATE TABLE IF NOT EXISTS public.scans (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    url_hash TEXT NOT NULL UNIQUE,
-    url TEXT NOT NULL,
-    summary TEXT NOT NULL,
-    risk_score INTEGER NOT NULL CHECK (risk_score >= 0 AND risk_score <= 100),
-    category TEXT NOT NULL,
-    tags TEXT[] DEFAULT '{}',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Enable pgcrypto for UUID generation
+create extension if not exists "pgcrypto";
+
+-- Main scans table
+create table if not exists public.scans (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id),
+  url_hash text not null,
+  url text not null,
+  summary text not null,
+  risk_score integer not null check (risk_score >= 0 and risk_score <= 100),
+  reason text not null,
+  category text not null,
+  tags text[] default '{}',
+  created_at timestamptz not null default now(),
+  constraint scans_user_url_unique unique (user_id, url_hash)
 );
 
--- Create an index on url_hash for fast lookups
-CREATE INDEX IF NOT EXISTS idx_scans_url_hash ON public.scans(url_hash);
-
--- Create an index on created_at for recent scans queries
-CREATE INDEX IF NOT EXISTS idx_scans_created_at ON public.scans(created_at DESC);
+-- Indexes for performance
+create index if not exists idx_scans_user_id on public.scans(user_id);
+create index if not exists idx_scans_url_hash on public.scans(url_hash);
+create index if not exists idx_scans_created_at on public.scans(created_at desc);
 
 -- Enable Row Level Security
-ALTER TABLE public.scans ENABLE ROW LEVEL SECURITY;
+alter table public.scans enable row level security;
 
--- Create a policy for public read access
-CREATE POLICY "Allow public read access" 
-ON public.scans 
-FOR SELECT 
-TO public 
-USING (true);
+-- RLS: Only allow users to read/insert their own scans
+create policy "Users can read their own scans" on public.scans
+  for select to authenticated
+  using (auth.uid() = user_id);
 
--- Create a policy for public insert access (needed for API to write)
-CREATE POLICY "Allow public insert access" 
-ON public.scans 
-FOR INSERT 
-TO public 
-WITH CHECK (true);
+create policy "Users can insert their own scans" on public.scans
+  for insert to authenticated
+  with check (auth.uid() = user_id);
 
--- Optional: Create a policy to prevent updates/deletes (cache is immutable)
-CREATE POLICY "Prevent updates" 
-ON public.scans 
-FOR UPDATE 
-TO public 
-USING (false);
+-- Prevent updates and deletes (immutable cache)
+create policy "Prevent updates" on public.scans
+  for update to authenticated
+  using (false);
 
-CREATE POLICY "Prevent deletes" 
-ON public.scans 
-FOR DELETE 
-TO public 
-USING (false);
+create policy "Prevent deletes" on public.scans
+  for delete to authenticated
+  using (false);

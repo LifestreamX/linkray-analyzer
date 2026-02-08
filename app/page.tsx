@@ -327,11 +327,39 @@ export default function Home() {
               <div className='p-6'>
                 {/* Screenshot Image */}
                 {result.screenshot_url && (
-                  <div className='mb-6 flex justify-center'>
+                  <div className='mb-6 flex flex-col items-center justify-center'>
                     <ScreenshotWithSkeleton
                       src={result.screenshot_url}
                       alt='Website Screenshot'
                     />
+                    {result.url && (
+                      <a
+                        href={
+                          result.url.startsWith('http')
+                            ? result.url
+                            : `https://${result.url}`
+                        }
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='mt-3 inline-block text-blue-400 hover:text-blue-200 underline break-all text-sm font-medium transition-colors'
+                        aria-label='Open scanned website in new tab'
+                      >
+                        {result.url}
+                        <svg
+                          className='inline ml-1 mb-0.5 w-4 h-4'
+                          fill='none'
+                          stroke='currentColor'
+                          strokeWidth='2'
+                          viewBox='0 0 24 24'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            d='M14 3h7m0 0v7m0-7L10 14m-7 7h7a2 2 0 002-2v-7'
+                          ></path>
+                        </svg>
+                      </a>
+                    )}
                   </div>
                 )}
                 {/* Safety Score Bar and Label */}

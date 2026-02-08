@@ -1,234 +1,227 @@
-# 🔍 LinkRay - AI Link Pre-screener
+# 🔗 LinkRay - AI Link Analyzer
 
-**Know before you click.** A modern, AI-powered link analysis tool that provides safety scores, summaries, and screenshots for any URL.
+**Know before you visit.**
 
-## ✨ Features
+LinkRay is a modern, full-stack web app that uses AI to analyze, summarize, and score the safety of any website link. It features user authentication, smart caching, beautiful UI, and robust error handling—all built on a 100% free-tier stack.
 
-- 🤖 **AI-Powered Analysis** - Uses Google Gemini 1.5 Flash for intelligent content analysis
-- 🛡️ **Safety Scoring** - Get a 0-100 safety rating for any website
-- 📸 **Screenshots** - Automatic website preview using Microlink API
-- ⚡ **Smart Caching** - Returns cached results within 24 hours to save API costs
-- 🎨 **Modern UI** - Beautiful dark mode interface with Tailwind CSS
-- 🆓 **100% Free Stack** - Built entirely with free-tier services
+---
 
-## 🛠️ Tech Stack (Free Tier)
+## 🚀 Features
+
+- 🤖 **AI-Powered Analysis**: Google Gemini (multi-model fallback) for content and risk scoring
+- 🛡️ **Safety Scoring**: 0-100 risk score with color-coded UI
+- 📸 **Screenshots**: Website previews via Microlink API
+- ⚡ **Smart Caching**: 24-hour cache per user+URL (Supabase)
+- 👤 **User Accounts**: Google OAuth login, per-user scan history
+- 🎨 **Modern UI**: Tailwind CSS, dark mode, skeleton loaders for images
+- 📝 **Summaries & Tags**: AI-generated summaries, categories, and tags
+- 🆓 **100% Free Stack**: No paid services required
+
+---
+
+## 🛠️ Tech Stack
 
 - **Framework**: Next.js 14+ (App Router)
 - **Styling**: Tailwind CSS
-- **Database**: Supabase (PostgreSQL)
-- **AI**: Google Gemini 1.5 Flash
-- **Scraping**: Cheerio (lightweight, no headless browser)
-- **Screenshots**: Microlink API (free tier)
+- **Database**: Supabase (PostgreSQL, RLS, policies)
+- **AI**: Google Gemini (Gemma, Flash, fallback logic)
+- **Scraping**: Cheerio (static, no headless browser)
+- **Screenshots**: Microlink API
 - **Language**: TypeScript
 
-## 🚀 Quick Start
+---
 
-### 1. Prerequisites
-
-- Node.js 18+ installed
-- A Supabase account (free tier)
-- A Google Gemini API key (free tier)
-
-### 2. Clone & Install
-
-```bash
-cd website-summary
-npm install
-```
-
-### 3. Set Up Supabase
-
-1. Go to [supabase.com](https://supabase.com) and create a new project
-2. Once created, go to the SQL Editor
-3. Copy the contents of `supabase-schema.sql` and run it in the SQL Editor
-4. Go to Settings > API to get your project URL and anon key
-
-### 4. Get Google Gemini API Key
-
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Sign in with your Google account
-3. Click "Create API Key"
-4. Copy the generated key
-
-### 5. Configure Environment Variables
-
-Create a `.env` file in the root directory:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and add your credentials:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-GEMINI_API_KEY=your-gemini-api-key-here
-```
-
-### 6. Run the Development Server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser. 🎉
-
-## 📦 Project Structure
+## 🏗️ Project Structure
 
 ```
-linkray/
+linkray-app/
 ├── app/
 │   ├── api/
-│   │   ├── analyze/       # Main analysis API endpoint
+│   │   ├── analyze/       # Main AI analysis API
 │   │   │   └── route.ts
-│   │   └── recent/        # Recent scans endpoint
+│   │   ├── analyze/deep/  # Deep crawl AI analysis
+│   │   │   └── route.ts
+│   │   └── recent/        # Recent scans API
 │   │       └── route.ts
 │   ├── globals.css        # Global styles
 │   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Main landing page
+│   └── page.tsx           # Main UI (search, results)
 ├── lib/
 │   ├── supabase.ts        # Supabase client & helpers
-│   └── utils.ts           # Utility functions
+│   └── utils.ts           # Utility functions (hash, crawl, etc.)
 ├── types/
 │   └── index.ts           # TypeScript interfaces
-├── supabase-schema.sql    # Database schema
-├── .env.example           # Environment variables template
-├── next.config.js         # Next.js configuration
-├── tailwind.config.ts     # Tailwind CSS configuration
-└── package.json           # Dependencies
+├── supabase-schema.sql    # DB schema & RLS policies
+├── supabase-migration-*.sql # DB migrations
+├── .env.example           # Env vars template
+├── package.json           # Dependencies
+├── tailwind.config.ts     # Tailwind config
+├── next.config.js         # Next.js config
+└── README.md              # This file
 ```
 
-## 🔧 How It Works
+---
 
-1. **User Input**: User enters a URL
-2. **Cache Check**: System checks Supabase for existing scan (within 24 hours)
-3. **Scraping**: If no cache, fetches HTML using `fetch` with timeout guard
-4. **Content Extraction**: Uses Cheerio to extract and clean main content
-5. **AI Analysis**: Sends content to Gemini AI for analysis
-6. **Data Storage**: Saves result to Supabase with MD5 hash for caching
-7. **Response**: Returns safety score, summary, category, tags, and screenshot
+## ⚡ Quick Start
 
-## 🎯 API Endpoints
+1. **Clone & Install**
+   ```bash
+   git clone https://github.com/yourname/linkray-app.git
+   cd linkray-app
+   npm install
+   ```
+2. **Set Up Supabase**
+   - Create a project at [supabase.com](https://supabase.com)
+   - Run `supabase-schema.sql` and all `supabase-migration-*.sql` in SQL Editor
+   - Get your Project URL and anon key from Settings > API
+3. **Get Google Gemini API Key**
+   - Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Create and copy your API key
+4. **Configure Environment**
+   - Copy `.env.example` to `.env` and fill in your keys
+5. **Run the App**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000)
 
-### POST `/api/analyze`
+---
 
-Analyzes a URL and returns safety information.
+## 🔑 Environment Variables
 
-**Request Body:**
+```
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+---
+
+## 🧠 How It Works
+
+1. **User signs in** (Google OAuth via Supabase)
+2. **User enters a URL**
+3. **Cache check**: If scan exists for user+URL in last 24h, return cached result
+4. **Scraping**: Fetches and cleans HTML with Cheerio
+5. **AI Analysis**: Sends content to Gemini (multi-model fallback)
+6. **Screenshot**: Gets preview from Microlink
+7. **Save**: Upserts scan to DB (user_id, url_hash unique)
+8. **Result**: Returns summary, risk score, tags, screenshot, etc.
+
+---
+
+## 🗄️ Database Schema (Supabase)
+
+```sql
+CREATE TABLE scans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+  url_hash TEXT NOT NULL,
+  url TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  risk_score INTEGER NOT NULL CHECK (risk_score >= 0 AND risk_score <= 100),
+  reason TEXT NOT NULL,
+  category TEXT NOT NULL,
+  tags TEXT[] DEFAULT '{}',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT scans_user_url_unique UNIQUE (user_id, url_hash)
+);
+```
+
+**RLS Policies:**
+
+- Users can only read/insert their own scans
+- Updates/deletes are blocked (immutable cache)
+
+---
+
+## 📦 API Endpoints
+
+### `POST /api/analyze`
+
+Analyze a URL (quick scan, per-user cache).
+
+**Request:**
+
 ```json
-{
-  "url": "https://example.com"
-}
+{ "url": "https://example.com" }
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
   "data": {
     "id": "uuid",
+    "user_id": "uuid",
     "url": "https://example.com",
-    "summary": "Two-sentence summary",
+    "summary": "...",
     "risk_score": 85,
+    "reason": "...",
     "category": "Blog",
-    "tags": ["technology", "programming", "tutorial"],
+    "tags": ["tech", "tutorial"],
     "screenshot_url": "https://api.microlink.io/...",
-    "created_at": "2026-02-07T...",
+    "created_at": "...",
     "from_cache": false
   }
 }
 ```
 
-### GET `/api/recent`
+### `POST /api/analyze/deep`
 
-Fetches the most recent scans.
+Deep crawl and analyze a site (multiple pages, more detail).
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [...]
-}
-```
+### `GET /api/recent`
 
-## 🔒 Safety Features
-
-- **Timeout Protection**: 5-second timeout for website fetches
-- **Content Validation**: Ensures meaningful content before analysis
-- **Error Handling**: Graceful degradation with user-friendly messages
-- **Rate Limiting**: Built-in caching reduces API calls
-- **No Execution**: Uses Cheerio (static parsing) instead of headless browsers
-
-## 🎨 UI Features
-
-- Modern dark mode design
-- Color-coded safety scores (Green: Safe, Yellow: Caution, Red: Risky)
-- Loading states with skeleton loaders
-- Error handling with clear messages
-- Recent scans section for quick analysis
-- Responsive design for mobile/desktop
-
-## 📊 Database Schema
-
-```sql
-CREATE TABLE scans (
-  id UUID PRIMARY KEY,
-  url_hash TEXT UNIQUE NOT NULL,
-  url TEXT NOT NULL,
-  summary TEXT NOT NULL,
-  risk_score INTEGER NOT NULL,
-  category TEXT NOT NULL,
-  tags TEXT[],
-  created_at TIMESTAMP
-);
-```
-
-## 🚀 Deployment
-
-### Deploy to Vercel (Free)
-
-1. Push your code to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import your repository
-4. Add environment variables in Vercel dashboard
-5. Deploy! 🎉
-
-**Important**: Vercel's free tier has a 10-second timeout limit, which is handled in the code.
-
-## 🔄 Caching Strategy
-
-LinkRay implements smart caching to minimize API costs:
-
-- URLs are hashed using MD5
-- Cache is valid for 24 hours
-- Cached results are returned instantly
-- Fresh analysis only when cache expires
-
-## 🤝 Contributing
-
-This is a learning project demonstrating modern full-stack development. Feel free to fork and customize!
-
-## 📝 License
-
-MIT License - Use freely for personal or commercial projects.
-
-## 🙏 Credits
-
-- **Google Gemini AI** - For free, fast AI analysis
-- **Supabase** - For PostgreSQL database hosting
-- **Microlink** - For screenshot generation
-- **Next.js** - For the amazing React framework
-- **Vercel** - For free hosting
-
-## 💡 Future Enhancements
-
-- [ ] User accounts for scan history
-- [ ] Batch URL analysis
-- [ ] Browser extension
-- [ ] API rate limiting per IP
-- [ ] PDF report generation
-- [ ] Webhook notifications
+Get recent scans for the signed-in user.
 
 ---
 
+## 🎨 UI/UX Highlights
+
+- Responsive dark mode design
+- Color-coded safety scores (green/yellow/red)
+- Skeleton loader for screenshots
+- Error and loading states
+- Recent scans list (per user)
+
+---
+
+## 🔒 Security & Safety
+
+- RLS: Users can only access their own scans
+- All input validated and sanitized
+- Timeout guards on scraping
+- No headless browser (static parsing only)
+- API keys and secrets in `.env`
+
+---
+
+## 📝 License
+
+MIT License — Free for personal or commercial use.
+
+---
+
+## 🙏 Credits
+
+- Google Gemini AI
+- Supabase
+- Microlink
+- Next.js
+- Vercel
+
+---
+
+## 💡 Future Ideas
+
+- [ ] Batch URL analysis
+- [ ] Browser extension
+- [ ] PDF report export
+- [ ] Webhook notifications
+- [ ] API rate limiting
+
+---
+
+**Happy scanning!**
