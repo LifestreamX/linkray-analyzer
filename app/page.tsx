@@ -116,7 +116,12 @@ export default function Home() {
     // Find the scan in recentScans and display it directly
     const foundScan = recentScans.find((scan) => scan.url === scanUrl);
     if (foundScan) {
-      setResult(foundScan);
+      // Add screenshot URL dynamically (same as in API responses)
+      const screenshotUrl = `https://api.microlink.io?url=${encodeURIComponent(foundScan.url)}&screenshot=true&meta=false&embed=screenshot.url`;
+      setResult({
+        ...foundScan,
+        screenshot_url: screenshotUrl,
+      });
       return;
     }
     setResult(null);
